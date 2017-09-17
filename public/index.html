@@ -1,0 +1,298 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Movie</title>
+    <link rel="stylesheet" href="stylesheets/reset.css">
+    <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+    <script src="javascripts/jquery-3.2.1.min.js"></script>
+    <script src="javascripts/bootstrap.min.js"></script>
+    <style>
+        .box{
+            margin-top: 50px;
+            position: relative;
+        }
+        .color{
+            border-left-color: #59a7ff;
+        }
+        .MovieColor{
+            background: pink;
+        }
+        .MovieImg{
+            width:200px;
+            height:150px;
+            margin: 0;
+        }
+        td{
+            vertical-align: middle!important;
+            text-align: center;
+            height:50px;
+        }
+        /*tr{
+            white-space: normal;
+            text-overflow: ellipsis;
+            -webkit-line-clamp: 6;
+            overflow: hidden;
+
+        }*/
+        #add {
+            width: 100px;
+            height:100px;
+            border-radius: 50%;
+            position: absolute;
+            left:45%;
+        }
+        #add::before{
+            content: '+';
+            color: #fff156;
+            font-size: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container box">
+        <blockquote class="color">
+            <h1 class="text-primary col-sm-offset-1">电影资源</h1>
+        </blockquote>
+        <!--<nav class="navbar navbar-inverse" role="navigation">
+            <div class="collapse navbar-collapse">
+                <span class="navbar-brand MovieColor">Movie</span>
+                <ul class="nav navbar-nav">
+                    <li><a href="javascript:;">电影海报</a></li>
+                    <li><a href="javascript:;">电影名称</a></li>
+                    <li><a href="javascript:;">简介</a></li>
+                    <li><a href="javascript:;">评分</a></li>
+                    <li><a href="javascript:;">操作</a></li>
+                </ul>
+            </div>
+        </nav>-->
+
+        <table class="table table-hover table-striped table-condensed">
+            <tr>
+                <th class="text-info info text-center col-md-3">电影海报</th>
+                <th class="text-danger danger text-center  col-md-2">电影名称</th>
+                <th class="text-primary MovieColor text-center  col-md-3">简介</th>
+                <th class="text-success success text-center  col-md-2">评分</th>
+                <th class="text-warning warning text-center  col-md-2">操作</th>
+            </tr>
+            <tbody id="main"></tbody>
+        </table>
+        <span id="add" class="btn btn-primary text-warning"></span>
+        <!-- 模态框 -->
+        <div class="modal fade" id="MyModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                        </button><!-- &times; => x -->
+                        <h4 class="modal-title text-warning glyphicon glyphicon-home">Modal title</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--<p>One fine body&hellip;</p>--><!-- &hellip; => ... -->
+                        <form class="form-horizontal" role="form">
+                            <div class="form-group has-success has-feedback">
+                                <label class="control-label col-sm-3" for="MovieImg"><h5>电影海报</h5></label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control input-sm" id="MovieImg">
+                                </div>
+                            </div>
+                            <div class="form-group has-warning has-feedback">
+                                <label class="control-label col-sm-3" for="MovieName"><h5>电影名称</h5></label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control input-sm" id="MovieName">
+                                </div>
+                            </div>
+                            <div class="form-group has-error has-feedback">
+                                <label class="control-label col-sm-3" for="MovieInfo"><h5>简介</h5></label>
+                                <div class="col-sm-6">
+                                    <textarea class="form-control input-sm" id="MovieInfo" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group has-primary has-feedback">
+                                <label class="control-label col-sm-3" for="MovieNumBar"><h5>评分</h5></label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control input-sm" id="MovieNumBar">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button disabled="disabled" type="button" class="btn btn-warning glyphicon glyphicon-ok choose" data-dismiss="modal">YES</button>
+                        <button type="button" class="btn btn-danger glyphicon glyphicon-remove Mclose">NO</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(function () {
+        queryData();
+        closeMobal();
+        //渲染
+        function queryData() {
+            var arrdata = [];
+            $.get('http://localhost:3000/getMovieData',function (data) {
+                arrdata = data;
+                var ret = "";
+                for (var i = 0; i < arrdata.length; i++) {
+                    ret += `<tr>
+                            <td>
+                                <img class="img-rounded img-thumbnail MovieImg" src="${arrdata[i].movie_img}">
+                            </td>
+                            <td>${arrdata[i].movie_title}</td>
+                            <td>${arrdata[i].movie_info}</td>
+                            <td>${arrdata[i].movie_grade}</td>
+                            <td>
+                                <span movieid="${arrdata[i].id}" class="btn btn-warning updatemovie">修改</span>
+                                <span movieid="${arrdata[i].id}" class="btn btn-success description">详情</span>
+                                <span movieid="${arrdata[i].id}" class="btn btn-danger deletemovie">删除</span>
+                            </td>
+                        </tr>`;
+                    console.log("id-->",arrdata[i].id)
+                }
+                $('#main').html(ret);
+                addModal();
+                updateModal();
+                descriptionModal();
+                deleteModal();
+            });
+        }
+        // 添加
+        function addModal() {
+            $('#add').on('click',function () {
+                $('.choose:eq(0)').attr('flag','add');
+                clearInput();
+                disableds();
+                chooseclick();
+                $('#MyModal').modal('show')
+                $('.modal-title').text('添加电影')
+            });
+        }
+        // 修改
+        function updateModal() {
+            $('.updatemovie').on('click',function () {
+                $('.choose:eq(0)').attr('flag','update');
+                //$('.choose:eq(0)').attr('movieid',$(this).attr('movieid'));
+                var movieid = $(this).attr('movieid');
+                queryOne(movieid);
+                disableds();
+                chooseclick();
+                $('#MyModal').modal('show')
+                $('.modal-title').text('修改电影')
+            });
+        }
+        // 查询单个
+        function queryOne(id) {
+            if(!id) return;
+            var ret = {};
+            $.get('http://localhost:3000/getMovieDataOne',{id:id},function (data) {
+                ret = data;
+                for(var val in ret){
+                    $('#MovieImg').val(ret[val].movie_img)
+                    $('#MovieName').val(ret[val].movie_title)
+                    $('#MovieInfo').val(ret[val].movie_info)
+                    $('#MovieNumBar').val(ret[val].movie_grade)
+                }
+            });
+        }
+        // 详情
+        function descriptionModal() {
+                $('.description').on('click',function () {
+                    $(this).attr('flag', 'description');
+                    var movieid = $(this).attr('movieid');
+                    disableds(true)
+                    queryOne(movieid);
+                    $('#MyModal').modal('show')
+                    $('.modal-title').text('电影详情')
+                });
+        }
+        // 删除
+        function deleteModal() {
+            $('.deletemovie').on('click',function () {
+                var id = $(this).attr('movieid');
+                $.get('http://localhost:3000/delDataOne',{MovieId:id},function (data) {
+                    console.log('0 --> 失败;1 --> 成功:', data);
+                    if(data === '1'){
+                        queryData();
+                    }
+                });
+            });
+        }
+        // 完成
+        function chooseclick() {
+           $('.choose').click(function (e) {
+                 var flag = $(this).attr('flag');
+                 var movieid = $(this).attr('movieid');
+                 var MovieImg = $('#MovieImg').val();
+                 var MovieName = $('#MovieName').val();
+                 var MovieInfo = $('#MovieInfo').val();
+                 var MovieNumBar = $('#MovieNumBar').val();
+                 console.log(ret.length)
+                 if(flag === 'add') {
+                     $.post('http://localhost:3000/insertDataOne',
+                         {MovieImg: MovieImg, MovieName: MovieName, MovieInfo: MovieInfo, MovieNumBar: MovieNumBar}
+                         , function (data) {
+                             console.log('0 --> 失败;1 --> 成功:', data);
+                             queryData();
+                             clearInput();
+                         });
+                     //阻止事件
+                     $('#MyModal').modal("hide")
+                     //e.stopPropagation(); 祖辈函数==>stopImmediatePropagation()
+                     e.stopImmediatePropagation();
+                     //window.location.reload();
+                 }
+                 if(flag === 'update') {
+                     $.post('http://localhost:3000/updateDataOne',
+                         {
+                             MovieImg: MovieImg,
+                             MovieName: MovieName,
+                             MovieInfo: MovieInfo,
+                             MovieNumBar: MovieNumBar,
+                             MovieId: movieid
+                         }
+                         , function (data) {
+                             console.log('0 --> 失败;1 --> 成功:', data);
+                             queryData();
+                             clearInput();
+                         });
+                     //window.location.reload();
+                 }
+           })
+        }
+        // 清空
+        function clearInput() {
+            $('#MovieImg').val(' ');
+            $('#MovieName').val(' ');
+            $('#MovieInfo').val(' ');
+            $('#MovieNumBar').val(' ');
+        }
+        // 关闭按钮
+        function closeMobal() {
+            $('.Mclose').on('click',function () {
+                $('#MyModal').modal('hide')
+            });
+        }
+        // 禁用
+        function disableds(val) {
+            if(typeof val === 'boolean') {
+                $('#MovieImg').attr('disabled', 'disabled');
+                $('#MovieName').attr('disabled', 'disabled');
+                $('#MovieInfo').attr('disabled', 'disabled');
+                $('#MovieNumBar').attr('disabled', 'disabled');
+                $('.choose').attr("disabled", "disabled");
+            }else{
+                $('#MovieImg').removeAttr('disabled');
+                $('#MovieName').removeAttr('disabled');
+                $('#MovieInfo').removeAttr('disabled');
+                $('#MovieNumBar').removeAttr('disabled');
+                $('.choose').removeAttr('disabled');
+            }
+        }
+    });
+</script>
+</html>
